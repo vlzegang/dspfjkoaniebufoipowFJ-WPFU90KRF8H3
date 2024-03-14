@@ -1,0 +1,78 @@
+for k,v in pairs(getgc(true)) do
+	if pcall(function() return rawget(v,"indexInstance") end) and type(rawget(v,"indexInstance")) == "table" and  (rawget(v,"indexInstance"))[1] == "kick" then
+		v.tvk = {"kick",function() return game.Workspace:WaitForChild("") end}
+	end
+end
+wait(5)
+local NormalGravity = 196.2
+local Raw = getrawmetatable(game)
+setreadonly(Raw, false)
+	 
+local newcclosure, getnamecallmethod, checkcaller, getcaller = newcclosure, getnamecallmethod, checkcaller, getcallingscript
+local ACFlags, INFlags = 
+{'JumpPower','Gravity', 'HipHeight', 'Health', 'BodyVelocity', 'WalkSpeed', 'BodyPosition', 'BodyThrust', 'BodyAngularVelocity'}, 
+{'bv', 'hb', 'jp', 'hh', 'ws'}
+	 
+local NewIndex, NameCall; do
+	local IsA, IsDescendantOf = game.IsA, game.IsDescendantOf
+	local tfind = table.find
+	 
+	local unpack = unpack
+	 
+	local StarterGui = game:GetService'StarterGui'
+	local SetCore = StarterGui.SetCore
+	 
+    local NewIndexFunc = function(self, Key, Value)
+	if not checkcaller() then
+    if IsA(self, 'Humanoid') then
+	SetCore(StarterGui, 'ResetButtonCallback', true)
+	 
+	if tfind(ACFlags, Key) then
+			return nil
+		end
+	end
+	if self == workspace and Key == 'Gravity' then
+		return NormalGravity
+	end
+	if Key == 'CFrame' and IsDescendantOf(self, game.Players.LocalPlayer.Character) then
+					return 0,0,0
+				end
+			end
+		return NewIndex(self, Key, Value)
+	end
+	 
+	local NameCallFunc = function(self, ...)
+	local Method = getnamecallmethod()
+	local Args = {...}
+	if Method == 'BreakJoints' and self == game.Players.LocalPlayer.Character then
+		return wait(9e9)
+	end
+    if Method == 'FireServer' then
+	if tfind(ACFlags, Args[1]) then
+		return wait(9e9)
+	end
+	local Name = self.Name
+	if Name == 'Input' then
+	    if tfind(INFlags, Args[1]) then
+			return wait(9e9)
+		end
+	end
+	if self.Parent == game.ReplicatedStorage or Args[1] == 'hey' and Name ~= 'SayMessageRequest' then
+		return wait(9e9)
+	end
+	if Args[1] == 'play' then
+		   PlayOnDeath = Args[2]
+	    elseif Args[1] == 'stop' then
+		   PlayOnDeath = nil
+		end
+	end
+	   return NameCall(self, unpack(Args))
+	end
+	if syn then
+		NewIndex = hookmetamethod(game, '__newindex', newcclosure(NewIndexFunc))
+		NameCall = hookmetamethod(game, '__namecall', newcclosure(NameCallFunc))
+		else
+		NewIndex = hookfunction(Raw.__newindex, newcclosure(NewIndexFunc))
+		NameCall = hookfunction(Raw.__namecall, newcclosure(NameCallFunc))
+	end
+end
