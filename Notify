@@ -1,0 +1,55 @@
+local NotifyUI = Instance.new("ScreenGui")
+local NotifyFrame = Instance.new("Frame")
+local CoreGui = game.CoreGui
+
+NotifyUI.Name = "NotifyUI"
+NotifyUI.Parent = CoreGui
+NotifyUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+NotifyFrame.Name = "NotifyFrame"
+NotifyFrame.Parent = NotifyUI
+NotifyFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+NotifyFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+NotifyFrame.BorderSizePixel = 0
+NotifyFrame.Size = UDim2.new(.5,0,.5,250)
+NotifyFrame.Position = UDim2.new(0,0,1,-250)
+NotifyFrame.Transparency = 1
+
+function Notify(Text)
+    local NotifyText = Instance.new("TextLabel")
+
+    NotifyText.Parent = NotifyFrame
+    NotifyText.BackgroundColor3 = Color3.fromRGB(25, 26, 42)
+    NotifyText.BackgroundTransparency = 0
+    NotifyText.BorderSizePixel = 1
+    NotifyText.BorderColor3 = Color3.fromRGB(115, 108, 149)
+    NotifyText.Position = UDim2.new(0,0,0,0)
+    NotifyText.Size = UDim2.new(0,10,0,20)
+    NotifyText.Font = Enum.Font.Code
+    NotifyText.Text = " " .. Text .. " "
+    NotifyText.TextTransparency = 0
+    NotifyText.TextScaled = false
+    NotifyText.ZIndex = 2
+    NotifyText.TextColor3 = Color3.fromRGB(255,255,255)
+    NotifyText.AutomaticSize = Enum.AutomaticSize.X
+    NotifyText.TextSize = 15.000
+    NotifyText.TextXAlignment = Enum.TextXAlignment.Left
+    NotifyText.TextWrapped = true
+    NotifyText.TextStrokeTransparency = 0
+    NotifyText.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+    coroutine.wrap(function()
+    local TweenVis = TweenService:Create(NotifyText, TweenInfo.new(1), {BackgroundTransparency = 1, TextTransparency = 1})
+    local maxNotifications = 8
+        while #NotifyFrame:GetChildren() >= maxNotifications do
+            wait()
+        end
+        for _, v in next, (NotifyFrame:GetChildren()) do
+            v:TweenPosition(v.Position + UDim2.new(0, 0, 0, -30), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, false)
+            wait()
+        end
+        wait(3)
+        TweenVis:Play()
+        wait()
+        NotifyText:Destroy()
+    end)()
+end
