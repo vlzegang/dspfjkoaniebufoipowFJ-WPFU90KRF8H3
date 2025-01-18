@@ -71,10 +71,12 @@ local UIListLayout = Instance.new("UIListLayout")
 local UIPadding = Instance.new("UIPadding")
 
 local TweenService = game:GetService("TweenService")
+local userinputservice = game:GetService("UserInputService")
 
 uiui.Name = "uiui"
 uiui.Parent = game:GetService("CoreGui")
 uiui.DisplayOrder = 1
+uiui.Enabled = false -- Start with the UI hidden
 
 background.Name = "background"
 background.Parent = uiui
@@ -84,11 +86,22 @@ background.Size = UDim2.new(0, 1234, 0, 664)
 
 UIListLayout.Parent = background
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
 UIListLayout.Padding = UDim.new(0, 10)
 
 UIPadding.Parent = background
 UIPadding.PaddingLeft = UDim.new(0, 10)
 UIPadding.PaddingTop = UDim.new(0, 10)
+
+local isUIHidden = true -- Keep track of the UI's visibility state
+
+userinputservice.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.P then
+        isUIHidden = not isUIHidden -- Toggle the state
+        uiui.Enabled = not isUIHidden -- Update the UI's visibility
+    end
+end)
 
 function library:CreateTab(text, desc, mode)
     text = text or ""
