@@ -93,13 +93,13 @@ UIPadding.Parent = background
 UIPadding.PaddingLeft = UDim.new(0, 10)
 UIPadding.PaddingTop = UDim.new(0, 10)
 
-local isUIHidden = false -- Keep track of the UI's visibility state
+local isUIHidden = false
 
 userinputservice.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.P then
-        isUIHidden = not isUIHidden -- Toggle the state
-        uiui.Enabled = not isUIHidden -- Update the UI's visibility
+        isUIHidden = not isUIHidden
+        uiui.Enabled = not isUIHidden
     end
 end)
 
