@@ -93,7 +93,7 @@ UIPadding.Parent = background
 UIPadding.PaddingLeft = UDim.new(0, 10)
 UIPadding.PaddingTop = UDim.new(0, 10)
 
-local isUIHidden = true -- Keep track of the UI's visibility state
+local isUIHidden = false -- Keep track of the UI's visibility state
 
 userinputservice.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
