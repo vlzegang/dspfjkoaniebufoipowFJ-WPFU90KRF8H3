@@ -76,7 +76,7 @@ local userinputservice = game:GetService("UserInputService")
 uiui.Name = "uiui"
 uiui.Parent = game:GetService("CoreGui")
 uiui.DisplayOrder = 1
-uiui.Enabled = false -- Start with the UI hidden
+uiui.Enabled = true
 
 background.Name = "background"
 background.Parent = uiui
