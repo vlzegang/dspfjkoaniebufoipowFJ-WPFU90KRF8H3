@@ -77,8 +77,3 @@ meta.__namecall = newcclosure(function(self, ...)
 
     return origNamecall(self, ...)
 end)
-
-
--- Restore metatable protection
-safeSetReadOnly(meta, true)
-safeSetReadOnly(rawMeta, true)
