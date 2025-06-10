@@ -1,78 +1,84 @@
---// CONFIGURATION //--
-local NORMAL_GRAVITY = 196.2
-local BLOCKED_HUMANOID_PROPERTIES = {
-    "JumpPower", "Gravity", "HipHeight", "Health", "BodyVelocity", "WalkSpeed", "BodyPosition", "BodyThrust", "BodyAngularVelocity"
-}
-local BLOCKED_INPUT_FLAGS = { "bv", "hb", "jp", "hh", "ws" }
-
---// UTILITY FUNCTIONS //--
-function safe_table_find(tbl, val)
-    for i, v in ipairs(tbl) do
-        if v == val then return i end
-    end
-    return nil
+-- Utility functions
+function safeGetRawMetatable(obj)
+    local success, mt = pcall(getrawmetatable, obj)
+    return success and mt or nil
 end
 
---// METATABLE SETUP //--
-local rawMeta = getrawmetatable(game)
-setreadonly(rawMeta, false)
-
-local newcclosure = newcclosure
-local getnamecallmethod = getnamecallmethod
-local checkcaller = checkcaller
-local getcallingscript = getcallingscript
-
-local NewIndex, NameCall
-
---// HOOKED FUNCTIONS //--
-function hook_index(self, key, value)
-    if not checkcaller() then
-        if typeof(self) == "Instance" and self:IsA("Humanoid") then
-            pcall(function()
-                game:GetService("StarterGui"):SetCore("ResetButtonCallback", true)
-            end)
-            if safe_table_find(BLOCKED_HUMANOID_PROPERTIES, key) then
-                return nil
-            end
-        end
-        if self == workspace and key == "Gravity" then
-            return NORMAL_GRAVITY
-        end
-        if key == "CFrame" and self:IsDescendantOf(game.Players.LocalPlayer.Character) then
-            return CFrame.new(0,0,0)
-        end
-    end
-    return NewIndex(self, key, value)
+function safeSetReadOnly(mt, state)
+    pcall(function() setreadonly(mt, state) end)
 end
-function hook_namecall(self, ...)
-    local method = getnamecallmethod()
+
+-- Get metatables
+local meta = debug.getmetatable(game)
+local rawMeta = safeGetRawMetatable(game)
+if not meta or not rawMeta then
+    warn("Failed to get metatables!")
+    return
+end
+
+-- Store original metamethods
+local origIndex = rawMeta.__index
+local origNewIndex = meta.__newindex
+local origNamecall = meta.__namecall
+
+-- Helper value for spoofing
+local spoofBool = Instance.new("BoolValue")
+spoofBool.Value = false
+
+-- Make metatables writable
+safeSetReadOnly(meta, false)
+safeSetReadOnly(rawMeta, false)
+
+-- Advanced __index hook
+rawMeta.__index = function(self, key)
+    if typeof(self) == "Instance" and self:IsA("Part") and key == "Anchored" then
+        return origIndex(spoofBool, "Value")
+    end
+    return origIndex(self, key)
+end
+
+-- Advanced __newindex hook
+meta.__newindex = newcclosure(function(self, key, value)
+    if checkcaller() then
+        return origNewIndex(self, key, value)
+    end
+
+    if typeof(self) == "Instance" and self:IsA("Humanoid") then
+        if key == "Health" and value == 0 then return end
+        if key == "WalkSpeed" and value == 0 then return end
+    end
+
+    if key == "CFrame" and (tostring(self) == "Torso" or tostring(self) == "HumanoidRootPart") then
+        return
+    end
+
+    return origNewIndex(self, key, value)
+end)
+
+-- Advanced __namecall hook
+meta.__namecall = newcclosure(function(self, ...)
     local args = {...}
-    if method == "BreakJoints" and self == game.Players.LocalPlayer.Character then
-        return wait(9e9)
+    local method = getnamecallmethod()
+
+    if not checkcaller() then
+        if method == "BreakJoints" then
+            return wait(9e9)
+        end
     end
+
     if method == "FireServer" then
-        local name = self.Name
-        if name == "Input" and safe_table_find(BLOCKED_INPUT_FLAGS, args[1]) then
+        if tostring(self) == "lIII" then
             return wait(9e9)
         end
-        if self.Parent == (args[1] == "hey" and name ~= "SayMessageRequest") then
+        if args[1] == "hey" and args[1] == "ws" then
             return wait(9e9)
         end
     end
-    return NameCall(self, unpack(args))
-end
 
---// HOOKING //--
-function hook_method()
-    if hookfunction then
-        NewIndex = hookfunction(rawMeta.__newindex, newcclosure(hook_index))
-        NameCall = hookfunction(rawMeta.__namecall, newcclosure(hook_namecall))
-        print("2")
-    else
-        warn("[Bypass] No suitable hook method found!")
-    end
-end
+    return origNamecall(self, ...)
+end)
 
---// INIT //--
-hook_method()
-print("Game bypassed.")
+
+-- Restore metatable protection
+safeSetReadOnly(meta, true)
+safeSetReadOnly(rawMeta, true)
