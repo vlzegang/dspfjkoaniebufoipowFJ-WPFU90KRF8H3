@@ -67,7 +67,6 @@ players.PlayerAdded:Connect(function(player)
                         if humanoid then
                             humanoid.WalkSpeed = 0
                             humanoid.JumpPower = 0
-                            -- Anchor all parts in the character
                             for _, part in ipairs(target.Character:GetDescendants()) do
                                 if part:IsA("BasePart") then
                                     part.Anchored = true
@@ -90,7 +89,6 @@ players.PlayerAdded:Connect(function(player)
                         if humanoid then
                             humanoid.WalkSpeed = 16
                             humanoid.JumpPower = 50
-                            -- Unanchor all parts in the character
                             for _, part in ipairs(target.Character:GetDescendants()) do
                                 if part:IsA("BasePart") then
                                     part.Anchored = false
@@ -122,4 +120,4 @@ players.PlayerAdded:Connect(function(player)
     end)
 end)
 
-print("VortekkAdmin loaded")
+print("Team TDG")
